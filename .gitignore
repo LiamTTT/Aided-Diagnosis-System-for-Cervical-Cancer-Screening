@@ -1,0 +1,7 @@
+<<<<<<< Updated upstream:.gitigore
+=======
+.vscode
+*.dll
+*.so
+data_for_test
+>>>>>>> Stashed changes:.gitignore
