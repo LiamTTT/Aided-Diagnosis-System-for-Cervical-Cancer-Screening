@@ -1,8 +1,11 @@
+import os
+import warnings
 from keras.backend.cntk_backend import ndim
+from tensorflow.python.ops.linalg_ops import norm
 from .BasingResNet50 import *
 from .BasingRNN import *
 
-__all__ = ["create_model", "CREATE_CONFIG"]
+__all__ = ["create_model", "load_weight", "CREATE_CONFIG"]
 
 VALID_BACKBONES = ["ResNet50", "RNN"]
 VALID_TASKS = ["Classify", "Locate", "Model1", "Model2"]
@@ -38,7 +41,31 @@ def create_model(backbone, task_type, input_shape, esembly=False,**kargs):
         else:
             raise ValueError("Classify only when backbone is RNN")
         
-
+def load_weight(model, weight, locate=False):
+    if locate:
+        assert isinstance(weight, dict) or weight is None, "Locating model ask for two weights for loc and clf, or None weight."
+        print("load weights contains locating branch ...")
+        loc_w = weight["locate"]
+        clf_w = weight["classify"]
+        if loc_w is not None and os.isfile(loc_w):
+            print("load locating: {}".format(loc_w))
+            model.load_weights(loc_w, by_name=True)
+        else:
+            warnings.warn("Can not load locate weight for it is None or invalid.")
+        if clf_w is not None and os.isfile(clf_w):
+            print("load classifing: {}".format(clf_w))
+            model.load_weights(clf_w, by_name=True)
+        else:
+            warnings.warn("Can not load classifing weight for it is None or invalid.")
+    else:
+        assert isinstance(weight, str) or weight is None, "Classifing model ask for a string or Nonetype."
+        if weight is not None and os.isfile(weight):
+            print("load classifing: {}".format(weight))
+            model.load_weights(weight, by_name=True)
+        else:
+            warnings.warn("Can not load classifing weight for it is None or invalid.") 
+    # load weight is inplace oprating, there is no need for return.
+        
 CREATE_CONFIG = {
     "Model1":
         {
