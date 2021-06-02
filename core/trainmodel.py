@@ -5,7 +5,7 @@ from keras.utils import multi_gpu_model
 from keras.callbacks import LearningRateScheduler
 
 from .networks import create_model, load_weight, CREATE_CONFIG
-from .lr_scheduler import Scheduler
+from .lr_scheduler import Scheduler, SCHDULERS
 
 TASK_METRICS = {
     "Classify": {
@@ -30,8 +30,9 @@ class TrainModel:
         self.locating = cfg["Model"]["locating_model"]
         self.nb_gpu = cfg["Opt"]["gpu_id"].split(',')
         self.task_metric = TASK_METRICS[self.create_cfg["task_type"]]
+        self.lr_scheduler = self.__get_lr_scheduler(cfg["Hyp"]["lr_scheduler"])
         # parse model create cfg
-        if isinstance(self.create_cfg, str) and self.create_cfg in CREATE_CONFIG.keys():
+        if isinstance(self.create_cfg, str) and self.create_cfg in CREATE_CONFIG.keys:
             print("use predefined model creating config: {}".format(self.create_cfg))
             self.create_cfg = CREATE_CONFIG[cfg["Model"]["model"]]
         self.optimizer = optimizers.Adam(lr=cfg['hyp']['lr']) if not cfg['Opt']['SGD'] else optimizers.SGD(lr=cfg['hyp']['lr'])
@@ -58,4 +59,9 @@ class TrainModel:
         parallel_model.compile(optimizer=self.optimizer, **self.task_metric)
         return parallel_model
 
-        
+    def __get_lr_scheduler(self, key):
+        if key is None:
+            print("Adjust lr manually.")
+            return None
+        assert key in SCHDULERS.keys, "choose scheduler form {}, or adjust manually(key=None)".format(SCHDULERS.keys)
+        return SCHDULERS[key]
