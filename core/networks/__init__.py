@@ -42,6 +42,12 @@ def create_model(backbone, task_type, input_shape, esembly=False,**kargs):
             raise ValueError("Classify only when backbone is RNN")
         
 def load_weight(model, weight, locate=False):
+    """load weight for model
+    Args:
+        model: a keras model.
+        weight: Nonetype, str(for only classifing model) or dict(for any model contain locating branch)
+        locate (bool, optional): indicator for indicating a locating branch. Defaults to False
+    """
     if locate:
         assert isinstance(weight, dict) or weight is None, "Locating model ask for two weights for loc and clf, or None weight."
         print("load weights contains locating branch ...")
